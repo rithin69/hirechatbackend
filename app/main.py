@@ -1,18 +1,28 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+import logging
 
 from .database import engine, Base
 from . import models  # registers models with this Base
 from .routes import auth_routes, job_routes, application_routes, chat_routes
 
+logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: Create tables once when app starts
-    Base.metadata.create_all(bind=engine)
-    yield
+    # Startup: Create tables once, handle race condition gracefully
+    try:
+        Base.metadata.create_all(bind=engine)
+        logger.info("✅ Database tables created/verified successfully")
+    except Exception as e:
+        logger.warning(f"⚠️  Table creation skipped (likely already exists): {e}")
+    
+    yield  # App runs here
+    
     # Shutdown: cleanup if needed (optional)
+    logger.info("🛑 Application shutting down")
 
 
 app = FastAPI(title="Kodamai Job Portal", lifespan=lifespan)
@@ -21,7 +31,7 @@ app = FastAPI(title="Kodamai Job Portal", lifespan=lifespan)
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://your-frontend-domain.com",  # Add your Azure frontend URL
+    # Add your Azure frontend URL here when ready
 ]
 
 

@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     smtp_port: int = 587
     smtp_user: str = "rithinmenezes007@gmail.com"
     smtp_password: str  ="wjscfndisbqodopn"
-    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
 
     class Config:
         env_file = ".env"

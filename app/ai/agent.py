@@ -78,7 +78,7 @@ def query_database_with_ai(question: str, hiring_manager_id: int) -> str:
                 if not apps:
                     return f"No applications yet for **{job.title}**"
                 
-                result = f"Found {len(apps)} application(s) for **{job.title}**:\n\n"
+                result = f"Found {len(apps)} application(s) for {job.title}:\n\n"
                 for app in apps:
                     applicant = db.query(models.User).filter(
                         models.User.id == app.applicant_id

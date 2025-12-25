@@ -1,6 +1,7 @@
 from typing import List
 import smtplib
 from email.message import EmailMessage
+import io
 
 from fastapi import (
     APIRouter,
@@ -11,6 +12,7 @@ from fastapi import (
     File,
     Form,
 )
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from .. import models, schemas
@@ -70,7 +72,6 @@ def create_application(
     db.add(db_application)
     db.commit()
     db.refresh(db_application)
-    
 
     try:
         send_application_email(
@@ -101,4 +102,34 @@ def list_my_applications(
     )
 
 
-
+@router.get("/{application_id}/cv")
+def download_cv(
+    application_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    """Download CV for an application - accessible by hiring managers and the applicant"""
+    application = db.get(models.Application, application_id)
+    
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    
+    # Check permissions: only hiring manager or the applicant can download
+    job = db.get(models.Job, application.job_id)
+    if (
+        current_user.role != models.UserRole.HIRING_MANAGER and 
+        application.applicant_id != current_user.id
+    ):
+        raise HTTPException(status_code=403, detail="Not authorized to download this CV")
+    
+    if not application.cv_content:
+        raise HTTPException(status_code=404, detail="No CV uploaded for this application")
+    
+    # Return the PDF file
+    return StreamingResponse(
+        io.BytesIO(application.cv_content),
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="{application.cv_filename}"'
+        }
+    )

@@ -10,12 +10,12 @@ from ..database import get_db
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
+
 @router.get("", response_model=List[schemas.JobOut])
 def list_jobs(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-  
     if current_user.role == "hiring_manager":
         return db.query(models.Job).filter(
             models.Job.hiring_manager_id == current_user.id
@@ -24,7 +24,6 @@ def list_jobs(
         return db.query(models.Job).filter(
             models.Job.status == "open"
         ).order_by(models.Job.created_at.desc()).all()
-
 
 
 @router.post("", response_model=schemas.JobOut, status_code=status.HTTP_201_CREATED)
@@ -75,42 +74,42 @@ def close_job(
     return job
 
 
+# ✅ KEEP ONLY THIS ONE (the better version)
 @router.get("/{job_id}/applications")
-def get_applications_by_job(
+def get_job_applications(
     job_id: int,
+    db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
-    db: Session = Depends(get_db)
 ):
-    if current_user.role != "hiring_manager":
-        raise HTTPException(
-            status_code=403, 
-            detail="Only hiring managers can view applications"
-        )
+    """Get all applications for a specific job (hiring managers only)"""
+    if current_user.role != models.UserRole.HIRING_MANAGER:
+        raise HTTPException(status_code=403, detail="Only hiring managers can view applications")
     
     job = db.get(models.Job, job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
     
+    # Only allow hiring manager who created the job
     if job.hiring_manager_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to view applications for this job")
     
-    applications = db.query(models.Application).filter(
-        models.Application.job_id == job_id
-    ).all()
+    applications = (
+        db.query(models.Application)
+        .filter(models.Application.job_id == job_id)
+        .all()
+    )
     
     result = []
     for app in applications:
-        applicant = db.query(models.User).filter(
-            models.User.id == app.applicant_id
-        ).first()
+        applicant = db.get(models.User, app.applicant_id)
         result.append({
             "id": app.id,
+            "applicant_name": applicant.full_name if applicant else "Unknown",
             "applicant_email": applicant.email if applicant else "Unknown",
             "cover_letter": app.cover_letter,
-            "cv_path": app.cv_path if hasattr(app, 'cv_path') else None,
-            "cv_filename": app.cv_filename if hasattr(app, 'cv_filename') else None,
+            "cv_filename": app.cv_filename,
             "status": app.status,
-            "created_at": app.created_at.isoformat() if app.created_at else None
+            "created_at": app.created_at,
         })
     
     return result

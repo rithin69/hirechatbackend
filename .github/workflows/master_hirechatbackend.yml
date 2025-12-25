@@ -54,4 +54,3 @@ jobs:
           app-name: 'hirechatbackend'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_5508E01C6E0849C487B02268336FBD14 }}
-          startup-command: 'python -m gunicorn -w 4 -k uvicorn.workers.UvicornWorker app.main:app'  # ✅ ADD THIS

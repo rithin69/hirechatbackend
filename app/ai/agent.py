@@ -83,6 +83,7 @@ def query_database_with_ai(question: str, hiring_manager_id: int) -> str:
                     applicant = db.query(models.User).filter(
                         models.User.id == app.applicant_id
                     ).first()
+                    result += f"• **{applicant.full_name if applicant else 'Unknown'}**\n"
                     result += f"• **{applicant.email if applicant else 'Unknown'}**\n"
                     result += f"  Status: {app.status}\n"
                     result += f"  CV: {app.cv_filename or 'No CV'}\n\n"

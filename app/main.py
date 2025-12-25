@@ -31,6 +31,7 @@ app = FastAPI(title="Kodamai Job Portal", lifespan=lifespan)
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "https://hirechat-fza5e9g0b0bne7ek.ukwest-01.azurewebsites.net"
     # Add your Azure frontend URL here when ready
 ]
 

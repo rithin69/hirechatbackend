@@ -33,10 +33,10 @@ def send_application_email(to_email: str, job_title: str, application_id: int) -
 
     body = (
         f"Hi,\n\n"
-        f"Your application (ID: {application_id}) for the role \"{job_title}\" has been received.\n"
+        f"Your application for the role \"{job_title}\" has been received.\n"
         f"We will review your application and get back to you.\n\n"
         f"Thanks,\n"
-        f"Kodamai Recruitr\n"
+        f"HireChat\n"
     )
 
     msg.set_content(body, subtype="plain", charset="utf-8")
@@ -114,7 +114,6 @@ def download_cv(
     if not application:
         raise HTTPException(status_code=404, detail="Application not found")
     
-    # Check permissions: only hiring manager or the applicant can download
     job = db.get(models.Job, application.job_id)
     if (
         current_user.role != models.UserRole.HIRING_MANAGER and 
@@ -125,7 +124,7 @@ def download_cv(
     if not application.cv_content:
         raise HTTPException(status_code=404, detail="No CV uploaded for this application")
     
-    # Return the PDF file
+   
     return StreamingResponse(
         io.BytesIO(application.cv_content),
         media_type="application/pdf",

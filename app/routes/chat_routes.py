@@ -32,9 +32,7 @@ def chat_query(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    """
-    Agentic AI endpoint - only shows data for THIS hiring manager
-    """
+    
     if current_user.role != "hiring_manager":
         return ChatAnswer(
             answer="Only hiring managers can use the recruitment assistant."

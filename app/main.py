@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 import logging
 
 from .database import engine, Base
-from . import models  # registers models with this Base
+from . import models  
 from .routes import auth_routes, job_routes, application_routes, chat_routes
 
 logger = logging.getLogger(__name__)
@@ -12,16 +12,16 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: Create tables once, handle race condition gracefully
+  
     try:
         Base.metadata.create_all(bind=engine)
         logger.info("✅ Database tables created/verified successfully")
     except Exception as e:
         logger.warning(f"⚠️  Table creation skipped (likely already exists): {e}")
     
-    yield  # App runs here
+    yield  
     
-    # Shutdown: cleanup if needed (optional)
+    
     logger.info("🛑 Application shutting down")
 
 
@@ -32,7 +32,7 @@ origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "https://hirechat-fza5e9g0b0bne7ek.ukwest-01.azurewebsites.net"
-    # Add your Azure frontend URL here when ready
+ 
 ]
 
 

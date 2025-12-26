@@ -13,7 +13,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
-    role: UserRole  # ← THIS WAS MISSING
+    role: UserRole  
 
 class UserOut(UserBase):
     id: int
@@ -30,7 +30,7 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     username: Optional[str] = None
 
-# Job Schemas
+
 class JobBase(BaseModel):
     title: str
     description: str
@@ -50,7 +50,7 @@ class JobOut(JobBase):
     class Config:
         from_attributes = True
 
-# Application Schemas
+
 class ApplicationBase(BaseModel):
     job_id: int
     cover_letter: str
@@ -68,7 +68,7 @@ class ApplicationOut(ApplicationBase):
     class Config:
         from_attributes = True
 
-# Message Schemas
+
 class MessageBase(BaseModel):
     content: str
 

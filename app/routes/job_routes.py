@@ -74,7 +74,6 @@ def close_job(
     return job
 
 
-# ✅ KEEP ONLY THIS ONE (the better version)
 @router.get("/{job_id}/applications")
 def get_job_applications(
     job_id: int,
@@ -89,7 +88,6 @@ def get_job_applications(
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
     
-    # Only allow hiring manager who created the job
     if job.hiring_manager_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to view applications for this job")
     

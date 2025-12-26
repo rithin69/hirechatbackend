@@ -5,7 +5,7 @@ from .config import Settings
 
 settings = Settings()
 
-# For SQLite, future=True gives SQLAlchemy 2-style behavior
+
 engine = create_engine(
     settings.database_url,
     connect_args={"check_same_thread": False} if settings.database_url.startswith("sqlite") else {},

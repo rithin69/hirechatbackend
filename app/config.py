@@ -4,7 +4,7 @@ import os
 
 
 class Settings(BaseSettings):
-    app_name: str = "Kodamai Recruitr"
+    app_name: str = "Hirechat Recruitr"
     backend_cors_origins: list[str] = [
         "http://localhost:5173",
         "https://hirechat-fza5e9g0b0bne7ek.ukwest-01.azurewebsites.net"
@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     smtp_port: int = int(os.getenv("SMTP_PORT", "587"))
     smtp_user: str = os.getenv("SMTP_USER", "rithinmenezes007@gmail.com")
     smtp_password: str = os.getenv("SMTP_PASSWORD", "wjscfndisbqodopn")
-    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+   
 
     class Config:
         env_file = ".env"

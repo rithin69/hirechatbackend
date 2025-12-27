@@ -25,7 +25,7 @@ async def lifespan(app: FastAPI):
     logger.info("🛑 Application shutting down")
 
 
-app = FastAPI(title="Kodamai Job Portal", lifespan=lifespan)
+app = FastAPI(title="Hirechat Job Portal", lifespan=lifespan)
 
 
 origins = [
@@ -53,4 +53,4 @@ app.include_router(chat_routes.router)
 
 @app.get("/")
 def root():
-    return {"message": "Kodamai Job Portal API ✅"}
+    return {"message": "Hirechat Job Portal API ✅"}

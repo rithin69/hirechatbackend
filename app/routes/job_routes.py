@@ -108,6 +108,10 @@ def get_job_applications(
             "cv_filename": app.cv_filename,
             "status": app.status,
             "created_at": app.created_at,
+            # NEW: Include AI analysis data
+            "ai_score": app.ai_score,
+            "ai_recommendation": app.ai_recommendation,
+            "ai_processed": app.ai_processed,
         })
     
     return result

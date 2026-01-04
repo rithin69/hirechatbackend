@@ -6,7 +6,6 @@ import logging
 from .database import engine, Base
 from . import models
 from .routes import auth_routes, job_routes, application_routes, chat_routes
-from .routes import agent_routes  # NEW
 
 logger = logging.getLogger(__name__)
 
@@ -23,10 +22,12 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Hirechat Job Portal", lifespan=lifespan)
 
+# UPDATED: Add your frontend URL
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://hirechat-fza5e9g0b0bne7ek.ukwest-01.azurewebsites.net"
+    "https://hirechat-fza5e9g0b0bne7ek.ukwest-01.azurewebsites.net",  # Frontend URL
+    "https://hirechat-fza5e9g0b0bne7ek.ukwest-01.azurewebsites.net",  # Add without trailing slash too
 ]
 
 app.add_middleware(
@@ -41,8 +42,7 @@ app.include_router(auth_routes.router)
 app.include_router(job_routes.router)
 app.include_router(application_routes.router)
 app.include_router(chat_routes.router)
-app.include_router(agent_routes.router)  # NEW
 
 @app.get("/")
 def root():
-    return {"message": "Hirechat Job Portal API ✅ with AI Agents 🤖"}
+    return {"message": "Hirechat Job Portal API ✅"}

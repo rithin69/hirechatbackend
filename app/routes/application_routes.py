@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, BackgroundTasks, status
+from fastapi.responses import Response
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -63,3 +64,48 @@ def create_application(
         "status": db_application.status,
         "cv_filename": db_application.cv_filename,
     }
+
+
+# NEW ROUTE: Download CV
+@router.get("/{application_id}/cv")
+def download_cv(
+    application_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    """Download CV file for an application"""
+    application = db.get(models.Application, application_id)
+    
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    
+    # Check if user is hiring manager or the applicant
+    if current_user.role == "hiring_manager":
+        # Hiring manager can download any CV
+        pass
+    elif current_user.id == application.applicant_id:
+        # Applicant can download their own CV
+        pass
+    else:
+        raise HTTPException(status_code=403, detail="Not authorized to download this CV")
+    
+    if not application.cv_content:
+        raise HTTPException(status_code=404, detail="CV file not found")
+    
+    # Determine content type based on filename
+    content_type = "application/pdf"  # default
+    if application.cv_filename:
+        if application.cv_filename.lower().endswith('.docx'):
+            content_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        elif application.cv_filename.lower().endswith('.doc'):
+            content_type = "application/msword"
+        elif application.cv_filename.lower().endswith('.txt'):
+            content_type = "text/plain"
+    
+    return Response(
+        content=application.cv_content,
+        media_type=content_type,
+        headers={
+            "Content-Disposition": f'attachment; filename="{application.cv_filename or "cv.pdf"}"'
+        }
+    )

@@ -6,6 +6,7 @@ import PyPDF2
 import io
 from ..config import Settings
 from .. import models
+from datetime import datetime 
 
 settings = Settings()
 openai.api_key = settings.openai_api_key

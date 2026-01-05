@@ -1,14 +1,30 @@
-# Add this import at the top
-from ..ai.cv_analysis import process_application_with_ai
-from fastapi import BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, BackgroundTasks, status
+from sqlalchemy.orm import Session
+from typing import List
 
-# Update the create_application function
+# Import your dependencies
+from ..database import get_db
+from ..auth import get_current_user
+from .. import models
+from ..ai.cv_analysis import process_application_with_ai
+
+# Try to import email function - adjust the path based on your actual file
+try:
+    from ..email_agent import send_application_email
+except ImportError:
+    # If email_agent doesn't exist, define a placeholder or import from correct location
+    def send_application_email(*args, **kwargs):
+        pass
+
+# CREATE THE ROUTER
+router = APIRouter(prefix="/applications", tags=["applications"])
+
 @router.post("", status_code=status.HTTP_201_CREATED)
 def create_application(
     job_id: int = Form(...),
     cover_letter: str = Form(...),
     cv: UploadFile = File(...),
-    background_tasks: BackgroundTasks = BackgroundTasks(),  # NEW
+    background_tasks: BackgroundTasks = BackgroundTasks(),
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
@@ -30,7 +46,6 @@ def create_application(
     db.commit()
     db.refresh(db_application)
     
-    # NEW: Trigger AI analysis in background
     background_tasks.add_task(process_application_with_ai, db_application.id, db)
     
     try:

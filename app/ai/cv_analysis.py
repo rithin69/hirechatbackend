@@ -109,7 +109,7 @@ def process_application_with_ai(application_id: int, db: Session) -> Dict[str, A
     app.ai_reasoning = analysis.get("reasoning", "")
     app.skills_extracted = json.dumps(analysis.get("skills", []))
     app.ai_processed = True
-    app.ai_processed_at = func.now()
+    app.ai_processed_at = datetime.now()
     
     # Auto-update status based on recommendation
     if analysis.get("recommendation") == "shortlist" and analysis.get("score", 0) >= 80:

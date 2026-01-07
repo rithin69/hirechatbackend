@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     smtp_host: str = os.getenv("SMTP_HOST", "smtp.gmail.com")
     smtp_port: int = int(os.getenv("SMTP_PORT", "587"))
     smtp_user: str = os.getenv("SMTP_USER", "rithinmenezes007@gmail.com")
-    smtp_password: str = os.getenv("SMTP_PASSWORD", "wjscfndisbqodopn")
+    smtp_password: str = os.getenv("SMTP_PASSWORD", "grfcprmukudhwfsy")
     
     # NEW: OpenAI Configuration
     openai_api_key: str = os.getenv("openai_api_key", "")  # Matches your Azure variable name

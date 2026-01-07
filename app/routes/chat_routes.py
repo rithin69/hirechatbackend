@@ -10,8 +10,10 @@ from .. import models
 from ..auth import get_current_user
 from ..database import get_db
 from ..ai.agent import query_database_with_ai
+from ..config import Settings
 
 router = APIRouter(prefix="/chat", tags=["chat"])
+settings = Settings()
 
 
 class ChatMessage(BaseModel):
@@ -45,7 +47,6 @@ def chat_query(
     return ChatAnswer(answer=answer)
 
 
-# ✅ NEW ENDPOINT FOR APPLICANTS
 @router.post("/applicant-query", response_model=ChatAnswer)
 def applicant_chat_query(
     payload: ChatQuery,
@@ -53,6 +54,8 @@ def applicant_chat_query(
     current_user: models.User = Depends(get_current_user),
 ):
     """Applicant job search assistant endpoint"""
+    print(f"[DEBUG] Applicant query received from user: {current_user.email}")
+    
     if current_user.role != "applicant":
         return ChatAnswer(
             answer="Only applicants can use the job search assistant."
@@ -60,14 +63,18 @@ def applicant_chat_query(
     
     try:
         # Get all open jobs
+        print("[DEBUG] Fetching jobs...")
         jobs = db.query(models.Job).filter(models.Job.status == "open").all()
+        print(f"[DEBUG] Found {len(jobs)} jobs")
         
         # Get user's applications
+        print("[DEBUG] Fetching applications...")
         applications = (
             db.query(models.Application)
             .filter(models.Application.applicant_id == current_user.id)
             .all()
         )
+        print(f"[DEBUG] Found {len(applications)} applications")
         
         # Build context for OpenAI
         jobs_context = "\n".join([
@@ -110,19 +117,27 @@ Be friendly, concise, and encouraging. If asked about specific jobs, reference t
         # Add current query
         messages.append({"role": "user", "content": payload.query})
         
-        # Call OpenAI
-        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        print("[DEBUG] Calling OpenAI...")
+        
+        # Call OpenAI using settings
+        client = OpenAI(api_key=settings.openai_api_key)
         response = client.chat.completions.create(
-            model="gpt-4",
+            model=settings.openai_model,
             messages=messages,
             temperature=0.7,
             max_tokens=500
         )
         
         answer = response.choices[0].message.content
+        print(f"[DEBUG] OpenAI response received: {answer[:50]}...")
         
         return ChatAnswer(answer=answer)
         
     except Exception as e:
-        print(f"Error in applicant chat: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"AI assistant error: {str(e)}")
+        import traceback
+        error_detail = traceback.format_exc()
+        print(f"[ERROR] Full traceback:\n{error_detail}")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"AI assistant error: {str(e)}"
+        )
